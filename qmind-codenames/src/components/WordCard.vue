@@ -1,27 +1,33 @@
 <template>
-  <div class="container" :class="{selected:props.wordObject.selected, bust:state.bomb, flipped:state.flipped}" 
+  <div class="container" :class="{wrong:wordObject.wrongGuess, correct:wordObject.correctGuess}" 
   @click="cardClicked()">
     <p>{{ wordObject.word }}</p>
   </div>
 </template>
 <script setup>
-import { computed, reactive, } from 'vue';
 /**
  * Takes in wordObject which represents the state of the card. 
  * This will be modified by the parent component.
  */
 
-const props = defineProps(['word', 'wordObject']);
-const emits = defineEmits(['card-clicked']);
+const props = defineProps(['wordObject']);
 
-const state = reactive({
-  flipped:computed(()=>props.wordObject.flipped),
-  bomb:computed(()=>props.wordObject.bust),
-});
-
-function cardClicked(){
+async function cardClicked(){
+  const w = props.wordObject;
   props.wordObject.selected = !props.wordObject.selected;
-  emits('card-clicked', props.wordObject);
+  const response = await fetch('http://127.0.0.1:5000/check_word', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ word: props.wordObject.word }),
+  });
+  const data = await response.json();
+  if (data.correct){
+    props.wordObject.guessedRight();
+  } else {
+    props.wordObject.guessedWrong();
+  }
 }
 </script>
 <style>
@@ -45,19 +51,13 @@ p {
   cursor: pointer;
 }
 
-.selected{
-  background-color: #f1660f;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.flipped{
+.correct{
   background-color: #f10fe9;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.bust{
+.wrong{
   background-color: red;
   border-radius: 5px;
   cursor: pointer;

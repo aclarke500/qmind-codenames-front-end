@@ -1,6 +1,5 @@
 <template>
   <h1>Qmind CodeNames</h1>
-  <button @click="submitMove()">Submit Move</button>
 
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
@@ -12,8 +11,9 @@
 </template>
 
 <script setup>
-import { reactive, onMounted, computed } from 'vue';
+import { reactive, onMounted } from 'vue';
 import WordCard from '@/components/WordCard.vue';
+import Word from '@/libraries/word.js';
 
 const state = reactive({
   numRows: 5,
@@ -23,65 +23,6 @@ const state = reactive({
   selectedWords: [],
 });
 
-function resetData(){
-  state.wordRows.forEach(row=>{
-    row.forEach(wordObject=>{
-      wordObject.selected = false;
-      wordObject.flipped = false;
-    });
-  });
-  state.selectedWords = [];
-
-}
-
-/**
- * Submits the selected words to the server
- */
-async function submitMove() {
-  // get data
-  const response = await fetch('http://127.0.0.1:5000/verify', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ words: state.selectedWords }),
-  });
-  const data = await response.json();
-
-  resetData();
-  // update valid words
-  data.valid_words.forEach((word) => {
-    state.wordRows.forEach((row) => {
-      row.forEach((wordObject) => {
-        if (wordObject.word === word) {
-          wordObject.flipped = true;
-        }
-      });
-    });
-  });
-  // update bomb words
-  data.bust_words.forEach((word) => {
-    state.wordRows.forEach((row) => {
-      row.forEach((wordObject) => {
-        if (wordObject.word === word) {
-          wordObject.bust = true;
-        }
-      });
-    });
-  });
-}
-
-/**
- * If the word is selected, add it to the selected words array. If it is not selected, remove it from the selected words array.
- * @param {Object} wordObject 
- */
-function cardClicked(wordObject){
-  if (wordObject.selected){
-    state.selectedWords.push(wordObject.word);
-  } else {
-    state.selectedWords = state.selectedWords.filter((word)=>word!==wordObject.word);
-  }
-}
 
 /**
  * Sets the words in the state to a 2D array
@@ -91,22 +32,17 @@ function setWords() {
     let row = [];
     for (let j = 0; j < state.numCols; j++) {
       const word = state.words[i * state.numCols + j];
-      const wordObject = {
-        word: state.words[i * state.numCols + j],
-        selected: false,
-        bust:false,
-        flipped:false,
-      };
-      row.push(wordObject);
+      row.push(new Word(word));
     }
     state.wordRows.push(row);
   }
+
 }
 
 /**
  * Fetches words from the server
  */
-async function getWords(){
+async function getWords() {
   const response = await fetch('http://127.0.0.1:5000/load_board', {
     method: 'GET',
     headers: {
@@ -115,7 +51,14 @@ async function getWords(){
   });
   const data = await response.json();
   state.words = data.words;
+  const s = state;
   setWords();
+  console.log(state.wordRows);
+  state.wordRows.forEach(row => {
+    row.forEach(wordObject => {
+      console.log(wordObject)
+    });
+  });
 }
 
 

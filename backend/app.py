@@ -24,7 +24,17 @@ def load_board():
   return jsonify({'words': word_choices})
 
 
-
+@app.route('/check_word', methods=['POST'])
+def check_word():
+  data = request.json
+  if not data or 'word' not in data:  
+      return jsonify({'error': 'No word provided'}), 400
+  
+  vowels = 'aeiou'
+  letters = 'spr'
+  return jsonify({'correct' : data['word'][0] in vowels or data['word'][0] in letters})
+     
+  
 
 @app.route('/verify', methods=['POST'])
 def verify():
