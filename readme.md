@@ -18,4 +18,4 @@ flask run
 and the front end by navigating to the qmind-codenames directory and running
 ```
 npm run serve
-```# qmind-codenames-front-end
+```
