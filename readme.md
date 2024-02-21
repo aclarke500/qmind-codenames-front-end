@@ -1,6 +1,6 @@
 <h2>Front End for QMIND's Bias Modelling Project featuring codenames</h2>
 
-You will need vue and flask installed, which you can install by running:
+You will need vue and flask installed, which you can install by running:<br>
 <strong>Vue:</strong>
 ```
 npm install -g @vue/cli
