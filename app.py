@@ -6,15 +6,6 @@ app = Flask(__name__)
 CORS(app)
 @cross_origin(origins='*')
 
-@app.route('/convert_to_uppercase', methods=['POST'])
-def convert_to_uppercase():
-    data = request.json
-    if not data or 'text' not in data:
-        return jsonify({'error': 'No text provided'}), 400
-
-    text = data['text']
-    uppercase_text = text.upper()
-    return jsonify({'original': text, 'uppercase': uppercase_text})
 
 @app.route('/load_board')
 def load_board():
@@ -31,6 +22,8 @@ def load_board():
       word_choices.append(words[i])
 
   return jsonify({'words': word_choices})
+
+
 
 
 @app.route('/verify', methods=['POST'])
@@ -53,7 +46,3 @@ def verify():
 
   return jsonify({'all_words': words, 'valid_words': valid_words, 'bust_words':bust_words})
 
-
-@app.route('/test')
-def hello_world():
-    return 'Hello, World!'
