@@ -2,17 +2,14 @@ export default class Word {
 
   constructor(word) {
     this.word = word;
-    this.selected = false;
     this.wrongGuess = false;
     this.correctGuess = false;
   }
   guessedWrong(){
-    this.selected = false;
     this.wrongGuess = true;
     this.correctGuess = false;
   }
   guessedRight(){
-    this.selected = false;
     this.wrongGuess = false;
     this.correctGuess = true;
   }

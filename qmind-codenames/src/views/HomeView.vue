@@ -1,5 +1,7 @@
 <template>
   <h1>Qmind CodeNames</h1>
+  <h3>Select words with the clue: </h3>
+  <div id="hint">{{state.hint }}</div>
 
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
@@ -7,7 +9,6 @@
     </div>
   </div>
 
-  <p>Selected words: {{ state.selectedWords }}</p>
 </template>
 
 <script setup>
@@ -20,7 +21,7 @@ const state = reactive({
   numCols: 5,
   words: null,
   wordRows: [],
-  selectedWords: [],
+  hint:null,
 });
 
 
@@ -51,14 +52,10 @@ async function getWords() {
   });
   const data = await response.json();
   state.words = data.words;
+  state.hint = data.hint;
   const s = state;
   setWords();
-  console.log(state.wordRows);
-  state.wordRows.forEach(row => {
-    row.forEach(wordObject => {
-      console.log(wordObject)
-    });
-  });
+
 }
 
 
@@ -80,6 +77,16 @@ onMounted(() => {
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+
+#hint {
+  display: inline;
+  color: #0f1af1;
+  font-size: 2rem;
+  font-weight: bold;
+}
+h3{
+  margin-bottom: 0;
 }
 
 button {

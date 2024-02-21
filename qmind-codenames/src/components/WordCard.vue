@@ -13,8 +13,6 @@
 const props = defineProps(['wordObject']);
 
 async function cardClicked(){
-  const w = props.wordObject;
-  props.wordObject.selected = !props.wordObject.selected;
   const response = await fetch('http://127.0.0.1:5000/check_word', {
     method: 'POST',
     headers: {
@@ -49,17 +47,23 @@ p {
   background-color: #f1c40f;
   border-radius: 5px;
   cursor: pointer;
+  transition: all 0.1s ease; /* This will animate all properties over a 300ms duration with an ease timing function */
 }
 
-.correct{
+
+.correct,
+.wrong {
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease; /* This will animate all properties over a 300ms duration with an ease timing function */
+}
+
+.correct {
   background-color: #f10fe9;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.wrong{
+.wrong {
   background-color: red;
-  border-radius: 5px;
-  cursor: pointer;
 }
+
 </style>
