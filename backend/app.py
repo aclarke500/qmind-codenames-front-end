@@ -21,7 +21,7 @@ def load_board():
   for i in indices:
       word_choices.append(words[i])
 
-  return jsonify({'words': word_choices})
+  return jsonify({'words': word_choices, 'hint':'vowels'})
 
 
 @app.route('/check_word', methods=['POST'])
@@ -34,25 +34,4 @@ def check_word():
   letters = 'spr'
   return jsonify({'correct' : data['word'][0] in vowels or data['word'][0] in letters})
      
-  
-
-@app.route('/verify', methods=['POST'])
-def verify():
-  data = request.json
-  if not data or 'words' not in data:  # Check for 'words' instead of 'text'
-      return jsonify({'error': 'No words provided'}), 400
-  
-  # Proceed with the original logic
-  valid_words = []
-  bust_words = []
-  words = data['words']  # Access the words correctly
-  vowels = 'aeiou'
-  for w in words:
-     if w[0] in vowels:
-        valid_words.append(w)
-     else:
-        bust_words.append(w)
-
-
-  return jsonify({'all_words': words, 'valid_words': valid_words, 'bust_words':bust_words})
 
