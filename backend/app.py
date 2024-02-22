@@ -22,7 +22,13 @@ vocab_data = VectorSearch(dataset, prune=True)
 
 print(f"Loading Model")
 model = MORSpyMaster(vocab_data, device=device)
-pretrained_dict = torch.load(MODEL_PATH)
+
+pretrained_dict = None 
+if torch.cuda.is_available():
+  pretrained_dict = torch.load(MODEL_PATH)   
+else: 
+   pretrained_dict = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+
 model.load_state_dict(pretrained_dict)
 model.to(device)
 model.eval()
