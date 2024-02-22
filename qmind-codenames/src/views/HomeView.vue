@@ -47,22 +47,45 @@ async function changeTurns(){
  * Fetches words from the server
  */
 async function assignBackendWordsToStore() {
-  const response = await fetch('http://127.0.0.1:5000/load_board', {
+  const response = await fetch('http://127.0.0.1:5000/model', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
   const data = await response.json();
-  console.log(data)
-  store.assassinWord = data.assassinWord;
-  console.log('ass word', store.assassinWord)
-  store.bystanderWords = data.bystanderWords;
-  store.teamOneWords = data.teamOneWords;
-  store.teamTwoWords = data.teamTwoWords;
-  assignStoreWordsToState();
+  // bind data from backend
+  state.hint = data.message;
+  store.assassinWord = data.assassin.split(' ');
+  store.bystanderWords = data.neutral.split(' ');
+  store.teamOneWords = data.targets.split(' ');
+  store.teamTwoWords = data.negative.split(' ');
+  // figure out dimensions of the board
+  const numWords = getLengthOfArrays([
+    store.bystanderWords,
+    store.assassinWord,
+    store.teamOneWords,
+    store.teamTwoWords
+  ])
+
+  store.numCols = Math.sqrt(numWords);
+  state.numCols = store.numCols
+  store.numRows = Math.sqrt(numWords);
+  state.numRows = store.numRows
+  assignStoreWordsToState(); // update the reactive state of the board
 }
 
+/**
+ * Gets the length of an array of arrays
+ * @param {Array<Array>} arr 
+ */
+function getLengthOfArrays(arr){
+  let sum = 0;
+  arr.forEach(ar => {
+    sum+= ar.length;
+  })
+  return sum;
+}
 
 function shuffle(arr) {
   return arr
@@ -74,6 +97,9 @@ function shuffle(arr) {
 }
 
 async function assignStoreWordsToState() {
+  const st = state;
+  const s = store;
+  debugger
   const words = [...store.teamOneWords, ...store.teamTwoWords, ...store.bystanderWords, ...store.assassinWord];
   const shuffledWords = shuffle(words);
   for (let i = 0; i < state.numRows; i++) {
