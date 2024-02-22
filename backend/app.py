@@ -2,15 +2,35 @@ from flask_cors import CORS, cross_origin
 from flask import Flask, request, jsonify
 import random
 import numpy as np
+from model.spymaster import MORSpyMaster
+from datasets.dataset import CodeNamesDataset
+from utils.vector_search import VectorSearch
+import torch
 
-# model = SentenceTransformer('all-MiniLM-L6-v2')
+VOCAB_PATH = "./data/words_extended.json"
+BOARD_PATH = "./data/codenames_boards.json"
+MODEL_PATH = "./data/model.pth"
+device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
+print(f"Server Running on: {device}")
 
+print(f"Loading embedding data")
+data = CodeNamesDataset(code_dir=VOCAB_PATH, game_dir=BOARD_PATH)
+vocab_data = VectorSearch(data, prune=True)
+
+
+
+print(f"Loading Model")
+model = MORSpyMaster(vocab_data, device=device)
+pretrained_dict = torch.load(MODEL_PATH)
+model.load_state_dict(pretrained_dict)
+model.to(device)
+
+print(f"Starting Server")
 app = Flask(__name__)
 words = {}
 
 CORS(app)
 @cross_origin(origins='*')
-
 
 def dot_product(v1, v2):
     return sum(x*y for x, y in zip(v1, v2))
@@ -29,8 +49,8 @@ def get_hints():
   
   # replace with model
   return jsonify({ 
-     'hintOne':'reptiles',
-     'hintTwo':'binary'
+    'hintOne':'reptiles',
+    'hintTwo':'binary'
   })
 
 @app.route('/guess_words', methods=['POST'])
@@ -57,8 +77,21 @@ def load_board():
   assassin_word = ['shit']
 
   return jsonify({
-     'teamOneWords':team_one_words,
-     'teamTwoWords':team_two_words,
-     'bystanderWords':neutral_words,
-     'assassinWord':assassin_word
+    'teamOneWords':team_one_words,
+    'teamTwoWords':team_two_words,
+    'bystanderWords':neutral_words,
+    'assassinWord':assassin_word
   })
+
+
+@app.route('/model', methods=['GET'])
+def run_model():
+   
+
+
+
+   return jsonify({'message': 'Fuck Yeah This Works'})
+
+
+if __name__ == "__main__":
+   app.run(debug=True)
