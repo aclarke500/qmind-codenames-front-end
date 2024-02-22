@@ -1,49 +1,52 @@
 <template>
   <h1>Qmind CodeNames</h1>
   <h3>Select words with the clue: </h3>
-  <div id="hint">{{state.hint }}</div>
+  <div id="hint">{{ state.hint }}</div>
 
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
-      <WordCard :wordObject="word" class="card" @card-clicked="(word) => cardClicked(word)" />
+      <WordCard :wordObject="word" class="card" 
+      @wrong-word="changeTurns()"/>
     </div>
   </div>
-
+  <h3>It is the {{ store.player }}'s Turn</h3>
 </template>
 
 <script setup>
 import { reactive, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import WordCard from '@/components/WordCard.vue';
 import Word from '@/libraries/word.js';
+import { store } from '@/store.js'
+import { computerMove }  from '@/libraries/game.js';
+
+
+const route = useRoute();
 
 const state = reactive({
-  numRows: 5,
-  numCols: 5,
+  numRows: 3,
+  numCols: 3,
   words: null,
   wordRows: [],
-  hint:null,
+  hint: null,
 });
 
 
-/**
- * Sets the words in the state to a 2D array
- */
-function setWords() {
-  for (let i = 0; i < state.numRows; i++) {
-    let row = [];
-    for (let j = 0; j < state.numCols; j++) {
-      const word = state.words[i * state.numCols + j];
-      row.push(new Word(word));
-    }
-    state.wordRows.push(row);
+
+
+async function changeTurns(){
+  if (store.player == 'Human'){
+    store.player = 'AI';
+    await computerMove();
+  } else {
+    store.player = 'Human';
   }
-
+  console.log(store.player);
 }
-
 /**
  * Fetches words from the server
  */
-async function getWords() {
+async function assignBackendWordsToStore() {
   const response = await fetch('http://127.0.0.1:5000/load_board', {
     method: 'GET',
     headers: {
@@ -51,21 +54,52 @@ async function getWords() {
     },
   });
   const data = await response.json();
-  state.words = data.words;
-  state.hint = data.hint;
-  const s = state;
-  setWords();
-
+  console.log(data)
+  store.assassinWord = data.assassinWord;
+  console.log('ass word', store.assassinWord)
+  store.bystanderWords = data.bystanderWords;
+  store.teamOneWords = data.teamOneWords;
+  store.teamTwoWords = data.teamTwoWords;
+  assignStoreWordsToState();
 }
 
 
+function shuffle(arr) {
+  return arr
+    .map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
+
+
+}
+
+async function assignStoreWordsToState() {
+  const words = [...store.teamOneWords, ...store.teamTwoWords, ...store.bystanderWords, ...store.assassinWord];
+  const shuffledWords = shuffle(words);
+  for (let i = 0; i < state.numRows; i++) {
+    let row = [];
+    for (let j = 0; j < state.numCols; j++) {
+      const word = shuffledWords[i * state.numCols + j];
+      const wordObj = new Word(word)
+      row.push(wordObj);
+      store.wordObjects.push(wordObj);
+    }
+    state.wordRows.push(row);
+  }
+  console.log(words);
+}
+
 
 onMounted(() => {
-  getWords();
+  // check if we have a custom board in store
+  if (route.params.customBoard && (store.teamOneWords)) {
+    assignStoreWordsToState();
+  } 
+  else assignBackendWordsToStore(); // also updates state
 });
 
 </script>
-<style>
+<style scoped>
 .card {
   border: 1px solid black;
   /* flex: 1; */
@@ -85,7 +119,8 @@ onMounted(() => {
   font-size: 2rem;
   font-weight: bold;
 }
-h3{
+
+h3 {
   margin-bottom: 0;
 }
 

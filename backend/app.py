@@ -1,37 +1,64 @@
 from flask_cors import CORS, cross_origin
 from flask import Flask, request, jsonify
 import random
+import numpy as np
+
+# model = SentenceTransformer('all-MiniLM-L6-v2')
 
 app = Flask(__name__)
+words = {}
+
 CORS(app)
 @cross_origin(origins='*')
 
 
-@app.route('/load_board')
-def load_board():
-  words = [
-    "apple", "dog", "river", "book", "sky", "orange", "music", "python", "coffee", "pencil",
-    "car", "road", "tree", "mountain", "ocean", "sandwich", "laptop", "glasses", "mouse", "phone",
-    "flower", "shirt", "shoe", "house", "light", "water", "cake", "chair", "desk", "guitar",
-    "bottle", "key", "clock", "photo", "map", "star", "cloud", "rain", "snow", "sun",
-    "moon", "planet", "universe", "forest", "beach", "city", "river", "animal", "bird", "fish"
-  ]
-  indices = random.sample(range(len(words)), 25)
-  word_choices = []
-  for i in indices:
-      word_choices.append(words[i])
+def dot_product(v1, v2):
+    return sum(x*y for x, y in zip(v1, v2))
 
-  return jsonify({'words': word_choices, 'hint':'vowels'})
+def norm(v):
+    return sum(x*x for x in v) ** 0.5
 
+def cosine_similarity(v1, v2):
+    return dot_product(v1, v2) / (norm(v1) * norm(v2))
 
-@app.route('/check_word', methods=['POST'])
-def check_word():
+@app.route('/get_hints', methods=['POST'])
+def get_hints():
   data = request.json
-  if not data or 'word' not in data:  
-      return jsonify({'error': 'No word provided'}), 400
+  if not data or not 'words' in data or not 'hint' in data:
+    return jsonify({'error':'bad inpit'}), 400
   
-  vowels = 'aeiou'
-  letters = 'spr'
-  return jsonify({'correct' : data['word'][0] in vowels or data['word'][0] in letters})
-     
+  # replace with model
+  return jsonify({ 
+     'hintOne':'reptiles',
+     'hintTwo':'binary'
+  })
 
+@app.route('/guess_words', methods=['POST'])
+def guess_words():
+  data = request.json
+  if not data or not 'words' in data or not 'hint' in data:
+    return jsonify({'error':'bad inpit'}), 400
+  
+  # replace with model
+
+  guesses = []
+  indices = random.sample(range(len(data['words'])),len(data['words']))
+
+  for i in indices:
+    guesses.append(data['words'][i])
+
+  return jsonify({'guesses':guesses})
+
+@app.route('/load_board', methods=['GET'])
+def load_board():
+  team_one_words = ['python', 'cornsake', 'lizards']
+  team_two_words = ['guitar', 'drum', 'bass']
+  neutral_words = ['hotdog', 'rock']
+  assassin_word = ['shit']
+
+  return jsonify({
+     'teamOneWords':team_one_words,
+     'teamTwoWords':team_two_words,
+     'bystanderWords':neutral_words,
+     'assassinWord':assassin_word
+  })

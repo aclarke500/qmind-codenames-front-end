@@ -5,30 +5,24 @@
   </div>
 </template>
 <script setup>
-/**
- * Takes in wordObject which represents the state of the card. 
- * This will be modified by the parent component.
- */
-
+import { checkWord } from '@/libraries/game';
 const props = defineProps(['wordObject']);
+const emits = defineEmits(['assassin', 'wrongWord'])
 
-async function cardClicked(){
-  const response = await fetch('http://127.0.0.1:5000/check_word', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ word: props.wordObject.word }),
-  });
-  const data = await response.json();
-  if (data.correct){
-    props.wordObject.guessedRight();
-  } else {
-    props.wordObject.guessedWrong();
+function cardClicked(){
+  const guess = checkWord(props.wordObject);
+  if (guess === 'correct'){
+    props.wordObject.correctGuess = true;
+  } else if (guess === 'wrong'){
+    props.wordObject.wrongGuess = true;
+    emits('wrongWord')
+  }
+  else if (guess === 'assassin'){
+    emits('assassin')
   }
 }
 </script>
-<style>
+<style scoped>
 p {
   font-size: 1rem;
   color: #2c3e50;

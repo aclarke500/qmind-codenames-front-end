@@ -1,4 +1,8 @@
 <template>
+  <nav>
+    <router-link to="/">Play</router-link> |
+    <router-link to="/design-board">Custom Board</router-link>
+  </nav>
   <router-view/>
 </template>
 
