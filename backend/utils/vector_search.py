@@ -14,6 +14,9 @@ class VectorSearch():
         self.index = faiss.IndexHNSWFlat(n_dim, n_neighbours)
         self.index.add(self.vocab_embeddings)
     
+    def __len__(self):
+        return len(self.vocab_words)
+    
     def search(self, logits: torch.Tensor, num_results=20):
         # detach tensor from device and convert it to numpy for faiss compatibility
         search_input = logits.detach().cpu().numpy()

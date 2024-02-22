@@ -22,14 +22,6 @@ class SentenceEncoder(nn.Module):
         # out = self.fc(encodings)
         return encodings
 
-class MOROutObj:
-    def __init__(self, words, model_out, search_out, search_out_max, search_out_min):
-        self.words = words
-        self.model_out = model_out
-        self.search_out = search_out
-        self.search_out_max = search_out_max
-        self.search_out_min = search_out_min
-
 class MORSpyMaster(nn.Module):
     """
     Multi-Objective Retrieval model for codenames with 4 competing objectives
@@ -59,7 +51,7 @@ class MORSpyMaster(nn.Module):
 
     def _process_embeddings(self, embs: Tensor):
         """Mean pool and normalize all embeddings"""
-        out = torch.mean(embs,dim=1)
+        out = torch.mean(embs, dim=1)
         out = F.normalize(out, p=2, dim=1)
         return out
     
@@ -167,7 +159,9 @@ class MORSpyMaster(nn.Module):
     def _convert_word_embeddings_to_tensor(self, embs: Tensor):
         return torch.tensor(embs).to(self.device).squeeze(1)
 
-    def forward(self, pos_embs: Tensor, neg_embs: Tensor, neut_embs: Tensor, assas_emb: Tensor) -> MOROutObj | tuple:
+    def forward(self, pos_embs: Tensor, neg_embs: Tensor, neut_embs: Tensor, assas_emb: Tensor):
+        if not self.training:
+            pos_embs, neg_embs, neut_embs, assas_emb = pos_embs.unsqueeze(0), neg_embs.unsqueeze(0), neut_embs.unsqueeze(0), assas_emb.unsqueeze(0)
         concatenated = self._get_combined_input(pos_embs, neg_embs, neut_embs, assas_emb)
         model_out = self.fc(concatenated)
 
@@ -185,4 +179,4 @@ class MORSpyMaster(nn.Module):
         if self.training:
             return model_out, search_out, search_out_max, search_out_min
         
-        return MOROutObj(words[search_out_index.cpu()][:, :1], model_out, search_out, search_out_max, search_out_min)
+        return search_out_index
