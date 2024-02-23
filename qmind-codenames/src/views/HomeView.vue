@@ -6,7 +6,10 @@
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
       <WordCard :wordObject="word" class="card" 
-      @wrong-word="changeTurns()"/>
+      @wrong-word="changeTurns()"
+      @assassin="userClickedAssassin()"
+      @click="checkGameState()"
+      />
     </div>
   </div>
   <h3>It is the {{ store.player }}'s Turn</h3>
@@ -16,9 +19,9 @@
 import { reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import WordCard from '@/components/WordCard.vue';
-import Word from '@/libraries/word.js';
+import {Word, createWordObjects} from '@/libraries/word.js';
 import { store } from '@/store.js'
-import { computerMove }  from '@/libraries/game.js';
+import { computerMove, checkForWinners, checkAssassinWord }  from '@/libraries/game.js';
 
 
 const route = useRoute();
@@ -31,13 +34,41 @@ const state = reactive({
   hint: null,
 });
 
+function playerWins(){
+  alert('Player Wins!');
+  location.reload();
+}
+function warrusWins(){
+  alert('Warrus Wins!');
+  location.reload();
+}
 
+function checkGameState(){
+  debugger
+  const c = checkAssassinWord();
+  const s = store;
+  if (checkAssassinWord() && store.player == 'AI'){
+    playerWins();
+  }
+  const winners = checkForWinners();
+  if (!winners){
+    return;
+  }
+  if (winners === 'teamOne'){
+    playerWins();
+  } else if (winners === 'teamTwo'){
+    warrusWins();
+  } 
+}
 
 
 async function changeTurns(){
   if (store.player == 'Human'){
     store.player = 'AI';
-    await computerMove();
+    const compMove = await computerMove();
+    debugger
+    checkGameState();
+    changeTurns();
   } else {
     store.player = 'Human';
   }
@@ -47,48 +78,65 @@ async function changeTurns(){
  * Fetches words from the server
  */
 async function assignBackendWordsToStore() {
-  const response = await fetch('http://127.0.0.1:5000/load_board', {
+  const response = await fetch('http://127.0.0.1:5000/model', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
   const data = await response.json();
-  console.log(data)
-  store.assassinWord = data.assassinWord;
-  console.log('ass word', store.assassinWord)
-  store.bystanderWords = data.bystanderWords;
-  store.teamOneWords = data.teamOneWords;
-  store.teamTwoWords = data.teamTwoWords;
-  assignStoreWordsToState();
+  console.log(data);
+  // bind data from backend
+  state.hint = data.message;
+  store.assassinWord = data.assassin.split(' ');
+  store.bystanderWords = data.neutral.split(' ');
+  store.teamOneWords = data.targets.split(' ');
+  store.teamTwoWords = data.negative.split(' ');
+  // figure out dimensions of the board
+  const numWords = getLengthOfArrays([
+    store.bystanderWords,
+    store.assassinWord,
+    store.teamOneWords,
+    store.teamTwoWords
+  ])
+
+  store.numCols = Math.sqrt(numWords);
+  state.numCols = store.numCols
+  store.numRows = Math.sqrt(numWords);
+  state.numRows = store.numRows
+  assignStoreWordsToState(); // update the reactive state of the board
 }
 
-
-function shuffle(arr) {
-  return arr
-    .map(value => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value)
-
-
+/**
+ * Gets the length of an array of arrays
+ * @param {Array<Array>} arr 
+ */
+function getLengthOfArrays(arr){
+  let sum = 0;
+  arr.forEach(ar => {
+    sum+= ar.length;
+  })
+  return sum;
 }
+
 
 async function assignStoreWordsToState() {
-  const words = [...store.teamOneWords, ...store.teamTwoWords, ...store.bystanderWords, ...store.assassinWord];
-  const shuffledWords = shuffle(words);
+  createWordObjects(); // creates word objects and stores them in store.wordObjects
   for (let i = 0; i < state.numRows; i++) {
     let row = [];
     for (let j = 0; j < state.numCols; j++) {
-      const word = shuffledWords[i * state.numCols + j];
-      const wordObj = new Word(word)
-      row.push(wordObj);
-      store.wordObjects.push(wordObj);
+      const word = store.wordObjects[i * state.numCols + j];
+      row.push(word);
     }
     state.wordRows.push(row);
   }
-  console.log(words);
 }
 
+function userClickedAssassin()
+{
+  alert('You clicked the assassin word! Game Over');
+  location.reload();
+}
 
 onMounted(() => {
   // check if we have a custom board in store

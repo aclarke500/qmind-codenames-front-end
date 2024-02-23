@@ -9,13 +9,11 @@ export function checkWord(wordObject) {
 }
 
 function getNonGuessedWords() {
-  const words = [];
-  store.wordObjects.forEach(wordObj => {
-    if (!(wordObj.wrongGuess || wordObj.correctGuess)) {
-      words.push(wordObj.word);
-    }
-  })
-  return words;
+  const f = store.wordObjects.filter((wordObj)=>!wordObj.flipped)
+  const m = f.map(wordObj =>
+    wordObj.word
+  )
+  return m;
 }
 
 
@@ -24,6 +22,7 @@ function checkComputerMoves(computerGuesses) {
     const guess = computerGuesses[i];
     if (store.teamTwoWords.includes(guess)) continue;
     else if (store.bystanderWords.includes(guess) || store.teamOneWords.includes(guess)) {
+      console.log(guess)
       return {
         result: 'wrong',
         numberOfGuesses: i + 1
@@ -47,15 +46,9 @@ function getWordObject(wordLiteral){
 }
 
 
-function updateComputerMove(wordObject){
-  if (store.teamOneWords.includes(wordObject) || store.bystanderWords.includes(wordObject)){
-    wordObject.guessedRight()
-  }
-  else wordObject.guessedRight();
-}
-
 export async function computerMove() {
   const availableWords = getNonGuessedWords();
+  console.log(availableWords)
   const response = await fetch('http://127.0.0.1:5000/guess_words', {
     method: 'POST',
     headers: {
@@ -68,10 +61,50 @@ export async function computerMove() {
   const guesses = data.guesses;
   const result = checkComputerMoves(guesses);
 
+  // Wrap setTimeout in a promise
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
   for (let i = 0; i < result.numberOfGuesses; i ++){
     const wordObject = getWordObject(guesses[i])
-    await setTimeout(()=>updateComputerMove(wordObject), 500);
+    await wait(1000)
+    wordObject.clicked()
+    await wait(500)
   }
+
+
   console.log(guesses)
   console.log(result)
+}
+
+/**
+ * Checks if all words in an array are flipped.
+ * @param {Array<Word>} arr 
+ * @returns {Boolean} If all are flipped
+ */
+function allAreFlipped(arr){
+  for (let i = 0; i < arr.length; i++){
+    if (!arr[i].flipped) return false
+  }
+  return true;
+}
+
+/**
+ * Checks if a team has won the game yet.
+ * Does not consider if AI/player guessess assassin word.
+ * @returns {String, Boolean} team name on win, else False
+ */
+export function checkForWinners(){
+  if (allAreFlipped(store.teamOneWordObjects)) return 'teamOne';
+  else if (allAreFlipped(store.teamTwoWordObjects)) return 'teamTwo';
+  else return false;
+}
+
+/**
+ * Checks if assassin word has been selected
+ */
+export function checkAssassinWord(){
+  for (let i = 0; i < store.wordObjects.length; i++){
+    if (store.wordObjects[i].wordType == 'assassin' && store.wordObjects[i].flipped) return true;
+  }
+  return false
 }
