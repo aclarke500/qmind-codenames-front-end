@@ -161,7 +161,7 @@ class MORSpyMaster(nn.Module):
 
     def forward(self, pos_embs: Tensor, neg_embs: Tensor, neut_embs: Tensor, assas_emb: Tensor):
         if not self.training:
-            pos_embs, neg_embs, neut_embs, assas_emb = pos_embs.unsqueeze(0), neg_embs.unsqueeze(0), neut_embs.unsqueeze(0), assas_emb.unsqueeze(0)
+            pos_embs, neg_embs, neut_embs = pos_embs.unsqueeze(0), neg_embs.unsqueeze(0), neut_embs.unsqueeze(0)
         concatenated = self._get_combined_input(pos_embs, neg_embs, neut_embs, assas_emb)
         model_out = self.fc(concatenated)
 

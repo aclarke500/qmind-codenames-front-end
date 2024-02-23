@@ -1,16 +1,17 @@
 from flask_cors import CORS, cross_origin
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import random
 from model.spymaster import MORSpyMaster
 from datasets.dataset import CodeNamesDataset
 from utils.vector_search import VectorSearch
+import utils.utilities as utils
 import torch
 import torch.nn.functional as F
+import json
 
-
-VOCAB_PATH = "./data/words_extended.json"
-BOARD_PATH = "./data/codenames_boards.json"
-MODEL_PATH = "./data/model.pth"
+VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/words_extended.json"
+BOARD_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/codenames_boards.json"
+MODEL_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/model.pth"
 
 device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 print(f"Server Running on: {device}")
@@ -44,22 +45,20 @@ def run_model():
     index = random.randint(0, len(dataset))
     sents, embs = dataset[index]
 
-
     pos_sent, neg_sent, neut_sent, assas_sent = sents
     # Process embeddings
     pos_embs, neg_embs, neut_embs, assas_emb = embs
     pos_embs, neg_embs = pos_embs.to(device), neg_embs.to(device)
     neut_embs, assas_emb = neut_embs.to(device), assas_emb.to(device)
+    assas_emb = assas_emb.unsqueeze(0)
 
     with torch.no_grad():
        guess, guess_emb = model(pos_embs, neg_embs, neut_embs, assas_emb)
 
-    assas_emb_expanded = assas_emb.unsqueeze(0)
-
     words = pos_sent + ' ' + neg_sent + ' ' + neut_sent + ' ' + assas_sent
     words = words.split(' ')
 
-    combined_embeddings = torch.cat((pos_embs, neg_embs, neut_embs, assas_emb_expanded), dim=0)
+    combined_embeddings = torch.cat((pos_embs, neg_embs, neut_embs, assas_emb), dim=0)
     cosine_scores = F.cosine_similarity(guess_emb, combined_embeddings, dim=1)
 
     cos_scores, cos_indices = cosine_scores.sort(descending=True)
@@ -68,7 +67,20 @@ def run_model():
 
     return jsonify({'hint': f'{guess}', 'targets': pos_sent, 'negative': neg_sent, 'neutral': neut_sent, 'assassin': assas_sent, 'similar_words': sorted_words, 'scores': cos_scores.tolist()})
 
+def encode_words(words: list) -> torch.Tensor:
+    embeddings = model.encoder(words)
+    return embeddings.to(device)
+
+@app.route('/prompt-model', methods=['POST'])
+def prompt_model():
+    data = request.get_json()
+    # TODO: Check viability of data
+
+    hint, sorted_words, word_scores = utils.process_prompt_data(data, model)
+
+    return jsonify({'hint': hint, 'similar_words': sorted_words, 'scores': word_scores})
+
 
 if __name__ == "__main__":
-   #run_model()
+   prompt_model()
    app.run(debug=True)

@@ -2,6 +2,7 @@ import torch
 from torch import Tensor
 #import matplotlib.pyplot as plt
 import torch.nn.functional as F
+from model.spymaster import SentenceEncoder, MORSpyMaster
 
 def get_device(is_cuda: str):
     if (is_cuda.lower() == 'y' and torch.cuda.is_available()):
@@ -89,3 +90,42 @@ def calc_codenames_score(model_out: Tensor, pos_encs: Tensor, neg_encs: Tensor, 
     neut_sum = torch.sum(first_incorrect_value == 1, dim=0)
 
     return num_correct.float().mean(), neg_sum, neut_sum, assassin_sum
+
+def encode_words(model: MORSpyMaster, words: list) -> Tensor:
+    embeddings = model.encoder(words)
+    return embeddings.to(model.device)
+
+def score_response(words: list, guess_emb: Tensor, targ_embs: Tensor, neg_embs: Tensor, neut_embs: Tensor, assas_emb: Tensor):
+    combined_embeddings = torch.cat((targ_embs, neg_embs, neut_embs, assas_emb), dim=0)
+    cosine_scores = F.cosine_similarity(guess_emb, combined_embeddings, dim=1)
+    cos_scores, cos_indices = cosine_scores.sort(descending=True)
+
+    sorted_words = [words[i] for i in cos_indices]
+    return sorted_words, cos_scores
+
+
+def process_prompt_data(data, model: MORSpyMaster):
+    targ_words = data['target_words']
+    neg_words = data['negative_words']
+    neut_words = data['neutral_words']
+    assas_word = data['assassin_word']
+    words = targ_words + neg_words + neut_words
+    words.append(assas_word)
+
+    targ_embs = encode_words(model, targ_words)
+    neg_embs =  encode_words(model, neg_words)
+    neut_embs = encode_words(model, neut_words)
+    assas_emb = encode_words(model, assas_word)
+
+    with torch.no_grad():
+        guess, guess_emb = model(targ_embs, neg_embs, neut_embs, assas_emb)
+    
+    sorted_words, word_scores = score_response(words, guess_emb, targ_embs, neg_embs, neut_embs, assas_emb)
+    return guess, sorted_words, word_scores.tolist()
+
+
+
+
+
+
+
