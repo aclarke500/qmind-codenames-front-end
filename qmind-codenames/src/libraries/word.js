@@ -48,5 +48,16 @@ store.teamOneWordObjects = addWordObjects(store.teamOneWords, 'teamOne');
 store.teamTwoWordObjects = addWordObjects(store.teamTwoWords, 'teamTwo');
 
   // disabled for debugging
-  // store.wordObjects = shuffle(store.wordObjects);
+  store.wordObjects = shuffle(store.wordObjects);
+}
+
+/**
+ * Get the word object given the string literal
+ * @param {String} word 
+ * @returns word object
+ */
+export function getWordObject(word){
+  for (let i = 0; i < store.wordObjects.length; i++){
+    if (store.wordObjects[i].word == word) return store.wordObjects[i]
+  }
 }
