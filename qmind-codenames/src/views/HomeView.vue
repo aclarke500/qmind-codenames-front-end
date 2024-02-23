@@ -65,6 +65,8 @@ async function changeTurns(){
   if (store.player == 'Human'){
     store.player = 'AI';
     const compMove = await computerMove();
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+    await wait(500);
     checkGameState();
     changeTurns();
   } else {

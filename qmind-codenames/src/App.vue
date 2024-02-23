@@ -1,8 +1,9 @@
 <template>
-  <nav>
+  <!-- removed while custom boards aren't supported -->
+  <!-- <nav>
     <router-link to="/">Play</router-link> |
     <router-link to="/design-board">Custom Board</router-link>
-  </nav>
+  </nav> -->
   <router-view/>
 </template>
 

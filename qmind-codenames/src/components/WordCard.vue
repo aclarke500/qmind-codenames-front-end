@@ -12,7 +12,6 @@
   </div>
 </template>
 <script setup>
-import { checkWord } from '@/libraries/game';
 import { store } from '@/store';
 const props = defineProps(['wordObject']);
 const emits = defineEmits(['assassin', 'wrongWord', 'click'])
