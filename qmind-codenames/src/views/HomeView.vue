@@ -19,16 +19,16 @@
 import { reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import WordCard from '@/components/WordCard.vue';
-import {Word, createWordObjects} from '@/libraries/word.js';
-import { store } from '@/store.js'
+import {createWordObjects} from '@/libraries/word.js';
+import { store, assignBackendWordsToStore } from '@/store.js'
 import { computerMove, checkForWinners, checkAssassinWord }  from '@/libraries/game.js';
 
 
 const route = useRoute();
 
 const state = reactive({
-  numRows: 3,
-  numCols: 3,
+  numRows: 5,
+  numCols: 5,
   words: null,
   wordRows: [],
   hint: null,
@@ -44,7 +44,6 @@ function warrusWins(){
 }
 
 function checkGameState(){
-  debugger
   const c = checkAssassinWord();
   const s = store;
   if (checkAssassinWord() && store.player == 'AI'){
@@ -66,58 +65,46 @@ async function changeTurns(){
   if (store.player == 'Human'){
     store.player = 'AI';
     const compMove = await computerMove();
-    debugger
     checkGameState();
     changeTurns();
   } else {
     store.player = 'Human';
   }
-  console.log(store.player);
 }
-/**
- * Fetches words from the server
- */
-async function assignBackendWordsToStore() {
-  const response = await fetch('http://127.0.0.1:5000/model', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  const data = await response.json();
-  console.log(data);
-  // bind data from backend
-  state.hint = data.message;
-  store.assassinWord = data.assassin.split(' ');
-  store.bystanderWords = data.neutral.split(' ');
-  store.teamOneWords = data.targets.split(' ');
-  store.teamTwoWords = data.negative.split(' ');
-  // figure out dimensions of the board
-  const numWords = getLengthOfArrays([
-    store.bystanderWords,
-    store.assassinWord,
-    store.teamOneWords,
-    store.teamTwoWords
-  ])
+// /**
+//  * Fetches words from the server
+//  */
+// async function assignBackendWordsToStore() {
+//   const response = await fetch('http://127.0.0.1:5000/model', {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   });
+//   const data = await response.json();
+//   console.log(data);
+//   // bind data from backend
+//   state.hint = data.message;
+//   store.assassinWord = data.assassin.split(' ');
+//   store.bystanderWords = data.neutral.split(' ');
+//   store.teamOneWords = data.targets.split(' ');
+//   store.teamTwoWords = data.negative.split(' ');
+//   // figure out dimensions of the board
+//   const numWords = getLengthOfArrays([
+//     store.bystanderWords,
+//     store.assassinWord,
+//     store.teamOneWords,
+//     store.teamTwoWords
+//   ])
 
-  store.numCols = Math.sqrt(numWords);
-  state.numCols = store.numCols
-  store.numRows = Math.sqrt(numWords);
-  state.numRows = store.numRows
-  assignStoreWordsToState(); // update the reactive state of the board
-}
+//   store.numCols = Math.sqrt(numWords);
+//   state.numCols = store.numCols
+//   store.numRows = Math.sqrt(numWords);
+//   state.numRows = store.numRows
+//   assignStoreWordsToState(); // update the reactive state of the board
+// }
 
-/**
- * Gets the length of an array of arrays
- * @param {Array<Array>} arr 
- */
-function getLengthOfArrays(arr){
-  let sum = 0;
-  arr.forEach(ar => {
-    sum+= ar.length;
-  })
-  return sum;
-}
+
 
 
 async function assignStoreWordsToState() {
@@ -130,6 +117,10 @@ async function assignStoreWordsToState() {
     }
     state.wordRows.push(row);
   }
+  state.numCols = store.numCols;
+  state.numRows = store.numRows;
+  state.hint = store.hint;
+  store.computerGuessIndex = 0;
 }
 
 function userClickedAssassin()
@@ -138,12 +129,17 @@ function userClickedAssassin()
   location.reload();
 }
 
-onMounted(() => {
-  // check if we have a custom board in store
-  if (route.params.customBoard && (store.teamOneWords)) {
-    assignStoreWordsToState();
+onMounted(async() => {
+  // // check if we have a custom board in store
+  // if (route.params.customBoard && (store.teamOneWords)) {
+  //   assignStoreWordsToState();
+  // } 
+  // else assignBackendWordsToStore(); // also updates state
+  // if no custom board, fetch from backend
+  if (!(route.params.customBoard || (store.teamOneWords))) {
+     await assignBackendWordsToStore();
   } 
-  else assignBackendWordsToStore(); // also updates state
+    assignStoreWordsToState();
 });
 
 </script>

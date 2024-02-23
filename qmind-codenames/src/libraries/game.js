@@ -1,4 +1,5 @@
 import { store } from '@/store'
+import { getWordObject } from './word';
 
 export function checkWord(wordObject) {
   if (store.teamOneWords.includes(wordObject.word)) {
@@ -16,6 +17,33 @@ function getNonGuessedWords() {
   return m;
 }
 
+
+function endTurn(guessWord){
+  if (store.teamTwoWords.includes(guessWord)) return false;
+  if (store.bystanderWords.includes(guessWord) || store.teamOneWords.includes(guessWord)) return 'wrong';
+  if (guessWord == store.assassinWord || store.assassinWord[0]) return 'assassin'
+}
+
+/**
+ * Determines the set of moves the computer is going to make
+ * @returns {Array<String>} the list of moves the computer is making
+ */
+function getComputerTurn(){
+  const s = store;
+  const computerMoves = [];
+  let turnOver = false;
+  while (!turnOver){
+    debugger
+    const guessWord = store.computerGuesses[store.computerGuessIndex];
+    const wordObj = getWordObject(guessWord);
+    if (!wordObj.flipped) {
+      computerMoves.push(wordObj);
+      turnOver = endTurn(guessWord);
+    }
+    store.computerGuessIndex++;
+  }
+  return computerMoves;
+}
 
 function checkComputerMoves(computerGuesses) {
   for (let i = 0; i < computerGuesses.length; i++) {
@@ -38,42 +66,32 @@ function checkComputerMoves(computerGuesses) {
   };
 }
 
-function getWordObject(wordLiteral){
-  for(let i = 0; i < store.wordObjects.length; i++){
-    if (store.wordObjects[i].word == wordLiteral) return store.wordObjects[i];
-  }
-  throw new Error('AHHH')
-}
 
 
 export async function computerMove() {
-  const availableWords = getNonGuessedWords();
-  console.log(availableWords)
-  const response = await fetch('http://127.0.0.1:5000/guess_words', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ words: availableWords, hint: 'hint' })
-  })
+  // const availableWords = getNonGuessedWords();
+  // console.log(availableWords)
+  // const response = await fetch('http://127.0.0.1:5000/guess_words', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({ words: availableWords, hint: 'hint' })
+  // })
 
-  const data = await response.json();
-  const guesses = data.guesses;
-  const result = checkComputerMoves(guesses);
-
+  // const data = await response.json();
+  // const guesses = data.guesses;
+  // const result = checkComputerMoves(guesses);
+  debugger
+  const compMove = getComputerTurn();
   // Wrap setTimeout in a promise
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  for (let i = 0; i < result.numberOfGuesses; i ++){
-    const wordObject = getWordObject(guesses[i])
+  for (let i = 0; i < compMove.length; i ++){
     await wait(1000)
-    wordObject.clicked()
+    compMove[i].clicked()
     await wait(500)
   }
-
-
-  console.log(guesses)
-  console.log(result)
 }
 
 /**
