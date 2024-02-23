@@ -33,17 +33,20 @@ function cardClicked(){
 </script>
 <style scoped>
 p {
-  font-size: 1rem;
+  font-size: 18px;
+  font-weight: bold;
   color: #2c3e50;
   display:inline;
 }
 .container{
+
   width: 6rem;
   height: 6rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
+  background-color: #948c8c;
 }
 /* styles for on hover */
 .container:hover{

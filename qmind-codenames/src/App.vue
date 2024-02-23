@@ -13,9 +13,15 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: white;
 }
 
+body{
+  background-color: #2c3e50;
+  color: white;
+  font-family: 'Arial';
+  overflow: hidden;
+}
 nav {
   padding: 30px;
 }
