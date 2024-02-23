@@ -1,24 +1,34 @@
 <template>
-  <div class="container" :class="{wrong:wordObject.wrongGuess, correct:wordObject.correctGuess}" 
+  <div class="container" 
+  :class="{
+    teamOne:wordObject.wordType == 'teamOne' && wordObject.flipped, 
+    teamTwo:wordObject.wordType == 'teamTwo' && wordObject.flipped, 
+    bystander:wordObject.wordType == 'bystander' && wordObject.flipped, 
+    assassin:wordObject.wordType == 'assassin' && wordObject.flipped, 
+  
+  correct:wordObject.correctGuess}" 
   @click="cardClicked()">
     <p>{{ wordObject.word }}</p>
   </div>
 </template>
 <script setup>
 import { checkWord } from '@/libraries/game';
+import { store } from '@/store';
 const props = defineProps(['wordObject']);
-const emits = defineEmits(['assassin', 'wrongWord'])
+const emits = defineEmits(['assassin', 'wrongWord', 'click'])
 
 function cardClicked(){
-  const guess = checkWord(props.wordObject);
-  if (guess === 'correct'){
-    props.wordObject.correctGuess = true;
-  } else if (guess === 'wrong'){
-    props.wordObject.wrongGuess = true;
-    emits('wrongWord')
+  if (props.wordObject.flipped || store.player == 'AI'){
+    return
   }
-  else if (guess === 'assassin'){
+  props.wordObject.clicked() // updates object and display
+  emits('click') // gets view to check if we've won the game
+  if (props.wordObject.wordType === 'assassin'){
     emits('assassin')
+  } else if (props.wordObject.wordType === 'bystander'){
+    emits('wrongWord')
+  } else if (props.wordObject.wordType === 'teamTwo'){
+    emits('wrongWord')
   }
 }
 </script>
@@ -45,18 +55,25 @@ p {
 }
 
 
-.correct,
-.wrong {
+.teamOne, .teamTwo, .bystander, .assassin {
   border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease; /* This will animate all properties over a 300ms duration with an ease timing function */
+  transition: all 0.5s ease; /* This will animate all properties over a 300ms duration with an ease timing function */
 }
 
-.correct {
-  background-color: #f10fe9;
+.teamOne {
+  background-color: #e5ede6;
 }
 
-.wrong {
+.assassin {
+  background-color: black;
+}
+
+.bystander {
+  background-color: #f1c40f;
+}
+
+.teamTwo {
   background-color: red;
 }
 

@@ -6,5 +6,9 @@ export const store = reactive({
   assassinWord: null,
   bystanderWords: null,
   player:'Human',
-  wordObjects:[]
+  wordObjects:[],
+  teamOneWordObjects:null,
+  teamTwoWordObjects:null,
+  bystanderWordObjects:null,
+
 })
