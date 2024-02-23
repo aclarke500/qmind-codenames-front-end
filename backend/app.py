@@ -9,9 +9,14 @@ import torch
 import torch.nn.functional as F
 import json
 
+
 VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/words_extended.json"
 BOARD_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/codenames_boards.json"
 MODEL_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/model.pth"
+
+VOCAB_PATH = "./data/words_extended.json"
+BOARD_PATH = "./data/codenames_boards.json"
+MODEL_PATH = "./data/model.pth"
 
 device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 print(f"Server Running on: {device}")
@@ -75,10 +80,19 @@ def encode_words(words: list) -> torch.Tensor:
 def prompt_model():
     data = request.get_json()
     # TODO: Check viability of data
+    # return 'egg'
 
-    hint, sorted_words, word_scores = utils.process_prompt_data(data, model)
+    cpu_hint, sorted_words, word_scores = utils.process_prompt_data(data, model)
+    data_for_human = {
+        "target_words": data['negative_words'],
+    "negative_words": data['target_words'],
+    "neutral_words": ["rabbit", "dog", "boop"],
+    "assassin_word": "assassin"
+    }
 
-    return jsonify({'hint': hint, 'similar_words': sorted_words, 'scores': word_scores})
+    human_hint, _, _, = utils.process_prompt_data(data_for_human, model)
+
+    return jsonify({'cpu_hint': cpu_hint, 'human_hint':human_hint, 'similar_words': sorted_words, 'scores': word_scores})
 
 
 if __name__ == "__main__":
