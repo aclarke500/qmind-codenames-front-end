@@ -13,6 +13,10 @@ VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/
 BOARD_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/codenames_boards.json"
 MODEL_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/model.pth"
 
+VOCAB_PATH = "./data/words_extended.json"
+BOARD_PATH = "./data/codenames_boards.json"
+MODEL_PATH = "./data/model.pth"
+
 device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 print(f"Server Running on: {device}")
 
