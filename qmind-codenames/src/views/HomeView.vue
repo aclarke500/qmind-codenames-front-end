@@ -32,8 +32,8 @@ function playerWins() {
   alert('Player Wins!');
   location.reload();
 }
-function warrusWins() {
-  alert('Warrus Wins!');
+function wordenWins() {
+  alert('Worden Wins!');
   location.reload();
 }
 
@@ -50,7 +50,7 @@ function checkGameState() {
   if (winners === 'teamOne') {
     playerWins();
   } else if (winners === 'teamTwo') {
-    warrusWins();
+    wordenWins();
   }
 }
 

@@ -5,12 +5,13 @@
 </div>
 
     <div class="centre">
-      <h1>Qmind CodeNames</h1>
+      <h1>QMIND CodeNames</h1>
       <h2 id="hint">Your clue: <div id="hint-word">{{ store.hint }}</div></h2>
     </div>
 
     <div class="right">
-      <h3 id="move-display">{{ state.player }} Move</h3>
+      <h3 id="move-display">{{ state.player }}'s Move</h3>
+      <h2 v-if="store.player == 'AI'">Using hint "{{ store.aiHint }}"</h2>
     </div>
   </div>
 </template>
@@ -21,9 +22,9 @@ import router from '@/router';
 const state = reactive({
   player: computed(() => {
     if (store.player == 'AI') {
-      return "Warrus'";
+      return "Worden";
     } else {
-      return "Player's";
+      return "Player";
     }
   })
 });

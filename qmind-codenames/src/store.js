@@ -12,6 +12,8 @@ export const store = reactive({
   bystanderWordObjects: null,
   computerGuesses: null,
   computerGuessIndex: null, // computer recieves guesses on load, we get 
+  hint:null,
+  aiHint:null,
 
 })
 
@@ -41,6 +43,7 @@ export async function assignBackendWordsToStore() {
   console.log(data);
   // bind data from backend
   store.hint = data.hint;
+  store.aiHint = data.hint;
   store.assassinWord = data.assassin.split(' ');
   store.bystanderWords = data.neutral.split(' ');
   store.teamTwoWords = data.targets.split(' ');
@@ -83,6 +86,7 @@ export async function loadCustomBoard(board) {
     store.computerGuesses = data.similar_words;
     store.computerGuessIndex = 0;
     store.hint = data.human_hint;
+    store.aiHint = data.cpu_hint;
     store.teamOneWords = board.teamOneWords;
     store.teamTwoWords = board.teamTwoWords;
     store.bystanderWords = board.bystanderWords;
