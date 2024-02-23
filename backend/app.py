@@ -9,10 +9,6 @@ import torch
 import torch.nn.functional as F
 import random
 
-VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/words_extended.json"
-BOARD_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/codenames_boards.json"
-MODEL_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/model.pth"
-
 VOCAB_PATH = "./data/words_extended.json"
 BOARD_PATH = "./data/codenames_boards.json"
 MODEL_PATH = "./data/model.pth"
