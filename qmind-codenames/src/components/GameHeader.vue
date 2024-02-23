@@ -1,13 +1,12 @@
 <template>
     <div class="header">
 <div class="left">
-  <h1> <button>Custom Board</button></h1>
+ <button @click="customBoard()">Custom Board</button>
 </div>
-
 
     <div class="centre">
       <h1>Qmind CodeNames</h1>
-      <h2 id="hint">Your hint is: {{ store.hint }}</h2>
+      <h2 id="hint">Your clue: <div id="hint-word">{{ store.hint }}</div></h2>
     </div>
 
     <div class="right">
@@ -18,8 +17,8 @@
 <script setup>
 import { store } from '@/store';
 import { reactive, computed } from 'vue';
+import router from '@/router';
 const state = reactive({
-
   player: computed(() => {
     if (store.player == 'AI') {
       return "Warrus'";
@@ -28,6 +27,10 @@ const state = reactive({
     }
   })
 });
+
+function customBoard() {
+  router.push('/design-board');
+}
 </script>
 
 <style scoped>
@@ -60,11 +63,14 @@ h1, h2, h3 {
   font-weight: bold;
 
 }
-#hint {
-  display: inline;
+#hint-word {
+  display: inline-block;
   color: #ea2b51;
-  font-size: 2rem;
+  /* font-size: 2rem; */
   font-weight: bold;
+}
+#hint{
+  margin-top: 1rem;
 }
 
 button {

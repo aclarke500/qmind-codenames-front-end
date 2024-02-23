@@ -37,6 +37,7 @@ function addWordObjects(sourceArray, type) {
 
 
 export function createWordObjects(){
+  const s = store;
 // Initialize the wordObjects array as empty
 store.wordObjects = [];
 // Add the assassin word object to the wordObjects array

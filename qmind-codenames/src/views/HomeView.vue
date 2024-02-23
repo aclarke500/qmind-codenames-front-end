@@ -1,19 +1,4 @@
 <template>
-  <!-- <div class="header">
-<div class="left">
-  <h1> <button>Custom Board</button></h1>
-</div>
-
-
-    <div class="centre">
-      <h1>Qmind CodeNames</h1>
-      <h2 id="hint">Your hint is: {{ state.hint }}</h2>
-    </div>
-
-    <div class="right">
-      <h3>Turns: {{ store.player }}</h3>
-    </div>
-  </div> -->
 <GameHeader />
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
@@ -84,6 +69,9 @@ async function changeTurns() {
 }
 
 async function assignStoreWordsToState() {
+  const s = store;
+  state.numCols = store.numCols;
+  state.numRows = store.numRows;
   createWordObjects(); // creates word objects and stores them in store.wordObjects
   for (let i = 0; i < state.numRows; i++) {
     let row = [];
@@ -93,10 +81,10 @@ async function assignStoreWordsToState() {
     }
     state.wordRows.push(row);
   }
-  state.numCols = store.numCols;
-  state.numRows = store.numRows;
+
   state.hint = store.hint;
   store.computerGuessIndex = 0;
+  console.log(state.wordRows);
 }
 
 function userClickedAssassin() {
@@ -105,7 +93,7 @@ function userClickedAssassin() {
 }
 
 onMounted(async () => {
-  if (!(route.params.customBoard || (store.teamOneWords))) {
+  if (!(route.params.customBoard && (store.teamOneWords))) {
     await assignBackendWordsToStore();
   }
   assignStoreWordsToState();
