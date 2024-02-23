@@ -174,9 +174,10 @@ class MORSpyMaster(nn.Module):
         if self.search_pruning:
             self._prune_word_embeddings(word_embeddings, model_out)
 
-        search_out, search_out_index, search_out_max, search_out_min = self.find_search_embeddings(word_embeddings, pos_embs, neg_embs, neut_embs, assas_emb)
+        search_embedding, search_out_index, search_out_max, search_out_min = self.find_search_embeddings(word_embeddings, pos_embs, neg_embs, neut_embs, assas_emb)
+        search_word = words[0][search_out_index]
 
         if self.training:
-            return model_out, search_out, search_out_max, search_out_min
+            return model_out, search_embedding, search_out_max, search_out_min
         
-        return search_out_index
+        return search_word, search_embedding

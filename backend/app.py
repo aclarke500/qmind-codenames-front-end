@@ -6,12 +6,12 @@ from model.spymaster import MORSpyMaster
 from datasets.dataset import CodeNamesDataset
 from utils.vector_search import VectorSearch
 import torch
-from torch.utils.data import DataLoader
+import torch.nn.functional as F
 import random
 
-VOCAB_PATH = "./data/words_extended.json"
-BOARD_PATH = "./data/codenames_boards.json"
-MODEL_PATH = "./data/model.pth"
+VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/words_extended.json"
+BOARD_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/codenames_boards.json"
+MODEL_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/model.pth"
 
 device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 print(f"Server Running on: {device}")
@@ -97,6 +97,7 @@ def run_model():
     index = random.randint(0, len(dataset))
     sents, embs = dataset[index]
 
+
     pos_sent, neg_sent, neut_sent, assas_sent = sents
     # Process embeddings
     pos_embs, neg_embs, neut_embs, assas_emb = embs
@@ -104,13 +105,23 @@ def run_model():
     neut_embs, assas_emb = neut_embs.to(device), assas_emb.to(device)
 
     with torch.no_grad():
-       search_index = model(pos_embs, neg_embs, neut_embs, assas_emb)
+       guess, guess_emb = model(pos_embs, neg_embs, neut_embs, assas_emb)
 
-    guess = vocab_data.vocab_words[search_index]
+    assas_emb_expanded = assas_emb.unsqueeze(0)
 
+    words = pos_sent + ' ' + neg_sent + ' ' + neut_sent + ' ' + assas_sent
+    words = words.split(' ')
 
-    return jsonify({'message': f'{guess}', 'targets': pos_sent, 'negative': neg_sent, 'neutral': neut_sent, 'assassin': assas_sent})
+    combined_embeddings = torch.cat((pos_embs, neg_embs, neut_embs, assas_emb_expanded), dim=0)
+    cosine_scores = F.cosine_similarity(guess_emb, combined_embeddings, dim=1)
+
+    cos_scores, cos_indices = cosine_scores.sort(descending=True)
+
+    sorted_words = [words[i] for i in cos_indices]
+
+    return jsonify({'hint': f'{guess}', 'targets': pos_sent, 'negative': neg_sent, 'neutral': neut_sent, 'assassin': assas_sent, 'similar_words': sorted_words, 'scores': cos_scores.tolist()})
 
 
 if __name__ == "__main__":
+   #run_model()
    app.run(debug=True)
