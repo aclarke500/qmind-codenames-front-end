@@ -1,7 +1,20 @@
 <template>
   <div class="container">
+
+    <div class="header-container">
+    <div class="left">
+      <button id="default-board">
+        Random
+      </button>
+    </div>
+    <div class="centre">
     <h1>Enter the words for your board:</h1>
     <input type="text" v-model="state.word" @keyup.enter="addWord" />
+  </div>
+  <div class="right">
+    <!-- just here so the flex works -->
+  </div>
+</div>
 
 
     <div class="word-container">
@@ -228,5 +241,33 @@ async function submitWords() {
 .custom-board:hover {
   background-color: red;
   transition: all 0.3s ease;
+}
+
+.header-container{
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+
+
+#default-board {
+  font-size:medium;
+  font-weight: bold;
+  margin: 10px;
+  background-color: #ed7777;
+  height: 5rem;
+  width: 5rem;
+  border: 2px solid black;
+  border-radius: 15%;
+}
+#default-board:hover {
+  background-color: #ea2b51;
+  border: black 3px solid;
+  cursor: pointer;
+  transition: all 0.5s ease;
 }
 </style>
