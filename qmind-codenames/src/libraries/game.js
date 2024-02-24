@@ -49,7 +49,7 @@ function getValidWords(wordObjects){
  * Gets the state of game board formatted for the API call
  * @returns {Object} formatted for the AI API
  */
-function getCurrentGameBoard(){
+export function getCurrentGameBoard(){
   return {
     target_words:getValidWords(store.teamTwoWordObjects),
     negative_words:getValidWords(store.teamOneWordObjects),
@@ -80,7 +80,6 @@ async function fetchComputerMoves(){
   const data = await response.json();
   // not good form to update here...but who cares
   store.aiHint = data.cpu_hint; 
-  store.hint = data.human_hint;
   return data.similar_words;
 
 }
@@ -97,9 +96,9 @@ export async function computerMove() {
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   for (let i = 0; i < compMove.length; i ++){
-    await wait(250)
+    await wait(100)
     compMove[i].clicked() // updates component/Obj
-    await wait(500)
+    await wait(250)
   }
 }
 

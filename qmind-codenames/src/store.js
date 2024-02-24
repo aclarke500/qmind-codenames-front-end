@@ -1,4 +1,5 @@
 import { reactive } from 'vue';
+import { getCurrentGameBoard } from '@/libraries/game';
 
 export const store = reactive({
   teamOneWords: null,
@@ -42,13 +43,22 @@ export async function assignBackendWordsToStore() {
   const data = await response.json();
   console.log(data);
   // bind data from backend
-  store.hint = data.hint;
+  // store.hint = data.hint;
   store.aiHint = data.hint;
   store.assassinWord = data.assassin.split(' ');
   store.bystanderWords = data.neutral.split(' ');
   store.teamTwoWords = data.targets.split(' ');
   store.teamOneWords = data.negative.split(' ');
   store.computerGuesses = data.similar_words;
+
+
+  // const responseForHumanHint = await fetch(await fetch('http://127.0.0.1:5000/prompt-model', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify(getCurrentGameBoard())
+  // }));
 
   // figure out dimensions of the board
   const numWords = getLengthOfArrays([
@@ -97,4 +107,22 @@ export async function loadCustomBoard(board) {
   } catch (error) {
     console.error("Failed to load custom board:", error);
   }
+}
+
+/**
+ * Passes the board to the backend to get the human hint.
+ * Not optimal but I do not want to touch the backend and the model is FAST.
+ */
+export async function updateHumanHint(){
+  const response = await fetch('http://127.0.0.1:5000/prompt-model', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(getCurrentGameBoard())
+  });
+  
+  const data = await response.json();
+  store.hint = data.human_hint;
+
 }

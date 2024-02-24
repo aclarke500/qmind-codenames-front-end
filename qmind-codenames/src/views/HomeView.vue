@@ -14,7 +14,7 @@ import { useRoute } from 'vue-router';
 import WordCard from '@/components/WordCard.vue';
 import GameHeader from '@/components/GameHeader.vue';
 import { createWordObjects } from '@/libraries/word.js';
-import { store, assignBackendWordsToStore } from '@/store.js'
+import { store, assignBackendWordsToStore, updateHumanHint } from '@/store.js'
 import { computerMove, checkForWinners, checkAssassinWord } from '@/libraries/game.js';
 
 
@@ -64,6 +64,7 @@ async function changeTurns() {
     checkGameState();
     changeTurns();
   } else {
+    await updateHumanHint();
     store.player = 'Human';
   }
 }
@@ -94,9 +95,11 @@ function userClickedAssassin() {
 
 onMounted(async () => {
   if (!(route.params.customBoard && (store.teamOneWords))) {
+    // if no custom board, assign backend words to store
     await assignBackendWordsToStore();
   }
-  assignStoreWordsToState();
+  await assignStoreWordsToState();
+  updateHumanHint();
 });
 
 </script>
