@@ -10,6 +10,13 @@ function endTurn(guessWord){
   if (store.teamTwoWords.includes(guessWord)) return false;
   if (store.bystanderWords.includes(guessWord) || store.teamOneWords.includes(guessWord)) return true;
   if (guessWord == store.assassinWord || store.assassinWord[0]) return true;
+  let wordenHasUnselectedCards = false; 
+  store.teamTwoWordObjects.forEach(wordObj =>{
+    if (!wordObj.flipped){
+      wordenHasUnselectedCards = true;
+    }
+  })
+  return !wordenHasUnselectedCards;
 }
 
 
@@ -24,10 +31,10 @@ function trimComputerMoves(computerGuesses){
 
   // add moves until computer makes a bad guess
   for (let i = 0; i < guessWordObjects.length; i++){
-    if (guessWordObjects[i].wordType != 'teamTwo'){
+    validGuesses.push(guessWordObjects[i])
+    if (endTurn(guessWordObjects[i].word)){
       return validGuesses;
     }
-    validGuesses.push(guessWordObjects[i])
   }
   return validGuesses;
 }
