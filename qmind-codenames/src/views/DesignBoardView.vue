@@ -3,7 +3,7 @@
 
     <div class="header-container">
     <div class="left">
-      <button id="default-board">
+      <button id="default-board" @click="openRandomBoard()">
         Random
       </button>
     </div>
@@ -92,6 +92,12 @@ const state = reactive({
   customBoards: customBoards,
 });
 
+
+function openRandomBoard() {
+  router.push({
+    name: 'home',
+  });
+}
 
 async function clickedCustomBoard(board) {
   await loadCustomBoard(board);
