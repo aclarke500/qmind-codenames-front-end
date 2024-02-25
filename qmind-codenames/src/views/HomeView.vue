@@ -1,15 +1,18 @@
 <template>
+  <GameOverModal v-if="state.gameOver" @play-again="reload()"
+  :message="state.message" :winner="state.winner"/>
 <GameHeader />
 
   <div class="container">
     <div class="left">
-      <!-- <p>Hi</p> -->
+      <GameHistory />
     </div>
 <div class="centre">
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
-      <WordCard :wordObject="word" class="card" @wrong-word="changeTurns()" @assassin="userClickedAssassin()"
-        @click="checkGameState()" />
+      <WordCard :wordObject="word" class="card" @wrong-word="changeTurns()" 
+      @assassin="gameOver('You clicked the assassin word!', 'AI')" 
+      @click="checkGameState()"/>
     </div>
   </div>
   </div>
@@ -22,12 +25,15 @@
 <script setup>
 import { reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { createWordObjects } from '@/libraries/word.js';
+import { store, assignBackendWordsToStore, updateHumanHint, clearData, getScore, updateScore } from '@/store.js'
+import { computerMove, checkForWinners, checkAssassinWord } from '@/libraries/game.js';
+
 import WordCard from '@/components/WordCard.vue';
 import GameHeader from '@/components/GameHeader.vue';
 import WordenGameDisplay from '@/components/WordenGameDisplay.vue';
-import { createWordObjects } from '@/libraries/word.js';
-import { store, assignBackendWordsToStore, updateHumanHint, clearData } from '@/store.js'
-import { computerMove, checkForWinners, checkAssassinWord } from '@/libraries/game.js';
+import GameHistory from '@/components/GameHistory.vue';
+import GameOverModal from '@/components/GameOverModal.vue';
 
 
 const route = useRoute();
@@ -38,31 +44,26 @@ const state = reactive({
   words: null,
   wordRows: [],
   hint: null,
+  gameOver:false,
 });
 
-function playerWins() {
-  alert('Player Wins!');
-  location.reload();
-}
-function wordenWins() {
-  alert('Worden Wins!');
+
+function reload() {
   location.reload();
 }
 
 function checkGameState() {
-  const c = checkAssassinWord();
-  const s = store;
   if (checkAssassinWord() && store.player == 'AI') {
-    playerWins();
+    gameOver("HA! That stupid AI got sucked to saddle point and clicked the assassin word. 'Artificial' Intelligence ain't so intelligent after all.", 'human');
   }
   const winners = checkForWinners();
   if (!winners) {
     return;
   }
   if (winners === 'teamOne') {
-    playerWins();
+    gameOver('Player Wins!', 'human');
   } else if (winners === 'teamTwo') {
-    wordenWins();
+    gameOver('Worden Wins!', 'AI');
   }
 }
 
@@ -100,9 +101,12 @@ async function assignStoreWordsToState() {
   console.log(state.wordRows);
 }
 
-function userClickedAssassin() {
-  alert('You clicked the assassin word! Game Over');
-  location.reload();
+
+async function gameOver(message, winner) {
+  await updateScore('AI');
+  state.gameOver = true;
+  state.message = message;
+  state.winner = winner;
 }
 
 onMounted(async () => {
@@ -114,6 +118,7 @@ onMounted(async () => {
 
   await assignStoreWordsToState();
   updateHumanHint();
+  getScore();
 });
 
 </script>

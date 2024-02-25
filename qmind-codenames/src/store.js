@@ -16,6 +16,8 @@ export const store = reactive({
   previousHumanHints:[],
   previousAiHints:[],
   previousAiGuesses:[], // array of Obj
+  wordenWins:null,
+  humanWins:null,
 
 })
 
@@ -133,4 +135,30 @@ export async function updateHumanHint(){
   const data = await response.json();
   store.hint = data.human_hint;
 
+}
+
+
+
+export async function getScore(){
+  const response = await fetch('http://127.0.0.1:5000/get-score', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  const data = await response.json();
+  console.log(data)
+  store.wordenWins = data.AI;
+  store.humanWins = data.human;
+}
+
+export async function updateScore(winner){
+  const response = await fetch('http://127.0.0.1:5000/update-score', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({winner})
+  });
+  
 }

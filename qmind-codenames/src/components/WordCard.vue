@@ -5,7 +5,7 @@
     teamTwo:wordObject.wordType == 'teamTwo' && wordObject.flipped, 
     bystander:wordObject.wordType == 'bystander' && wordObject.flipped, 
     assassin:wordObject.wordType == 'assassin' && wordObject.flipped, 
-  
+    hoverable: !wordObject.flipped && store.player != 'AI',
   correct:wordObject.correctGuess}" 
   @click="cardClicked()">
     <p>{{ wordObject.word }}</p>
@@ -49,8 +49,8 @@ p {
   background-color: #948c8c;
 }
 /* styles for on hover */
-.container:hover{
-  background-color: #f1c40f;
+.hoverable:hover{
+  background-color: #00aeff;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.1s ease; /* This will animate all properties over a 300ms duration with an ease timing function */
