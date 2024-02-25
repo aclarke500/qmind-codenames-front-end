@@ -58,13 +58,14 @@ function checkGameState() {
   }
   const winners = checkForWinners();
   if (!winners) {
-    return;
+    return true;
   }
   if (winners === 'teamOne') {
     gameOver('Player Wins!', 'human');
   } else if (winners === 'teamTwo') {
     gameOver('Worden Wins!', 'AI');
   }
+  return false;
 }
 
 
@@ -74,8 +75,7 @@ async function changeTurns() {
     const compMove = await computerMove();
     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
     await wait(500);
-    checkGameState();
-    changeTurns();
+    if (checkGameState()) changeTurns();
   } else {
     await updateHumanHint();
     store.player = 'Human';
