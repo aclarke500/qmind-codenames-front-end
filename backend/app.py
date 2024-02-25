@@ -18,6 +18,10 @@ VOCAB_PATH = "./data/words_extended.json"
 BOARD_PATH = "./data/codenames_boards.json"
 MODEL_PATH = "./data/model.pth"
 
+# score will be updated on front end
+worden_wins = 0
+player_wins = 0
+
 device = torch.device('cuda') if torch.cuda.is_available() else 'cpu'
 print(f"Server Running on: {device}")
 
@@ -94,6 +98,29 @@ def prompt_model():
 
     return jsonify({'cpu_hint': cpu_hint, 'human_hint':human_hint, 'similar_words': sorted_words, 'scores': word_scores})
 
+
+@app.route('/update-score', methods=['POST'])
+def update_score():
+   data = request.get_json()
+   global player_wins, worden_wins
+   if not data or 'winner' not in data:
+      # throw bad data error
+      return "data.winner not found", 400
+   
+   if data['winner'] == 'human':
+      player_wins+=1
+   elif data['winner'] == 'AI':
+      worden_wins+=1
+   else:
+      return "winner must be 'human' or 'AI'", 400
+   
+@app.route('/get-score', methods=['GET'])
+def get_model():
+   global worden_wins, player_wins
+   return jsonify({
+      "AI": worden_wins,
+      "human": player_wins
+   })
 
 if __name__ == "__main__":
    prompt_model()
