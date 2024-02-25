@@ -1,11 +1,22 @@
 <template>
 <GameHeader />
+
+  <div class="container">
+    <div class="left">
+      <!-- <p>Hi</p> -->
+    </div>
+<div class="centre">
   <div class="row" v-for="(row) in state.wordRows" key="row">
     <div v-for="(word) in row" key="word">
       <WordCard :wordObject="word" class="card" @wrong-word="changeTurns()" @assassin="userClickedAssassin()"
         @click="checkGameState()" />
     </div>
   </div>
+  </div>
+    <div class="right">
+      <WordenGameDisplay v-if="store.teamOneWordObjects"/>
+    </div>
+</div>
 </template>
 
 <script setup>
@@ -13,8 +24,9 @@ import { reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import WordCard from '@/components/WordCard.vue';
 import GameHeader from '@/components/GameHeader.vue';
+import WordenGameDisplay from '@/components/WordenGameDisplay.vue';
 import { createWordObjects } from '@/libraries/word.js';
-import { store, assignBackendWordsToStore, updateHumanHint } from '@/store.js'
+import { store, assignBackendWordsToStore, updateHumanHint, clearData } from '@/store.js'
 import { computerMove, checkForWinners, checkAssassinWord } from '@/libraries/game.js';
 
 
@@ -94,10 +106,12 @@ function userClickedAssassin() {
 }
 
 onMounted(async () => {
+  clearData();
   if (!(route.params.customBoard && (store.teamOneWords))) {
     // if no custom board, assign backend words to store
     await assignBackendWordsToStore();
   }
+
   await assignStoreWordsToState();
   updateHumanHint();
 });
@@ -105,13 +119,39 @@ onMounted(async () => {
 </script>
 <style scoped>
 
+.container{
+  display: flex;
+  flex-direction: columns;
+}
+
+.right{
+margin-top: 5rem;
+}
+
+.left, .right{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  align-items: center;
+}
+
+.centre {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
 .card {
   border: 1px solid black;
-  /* flex: 1; */
   margin: 5px;
+  flex:1;
 }
 
 .row {
+  flex: 1;
   display: flex;
   flex-direction: row;
   justify-content: center;

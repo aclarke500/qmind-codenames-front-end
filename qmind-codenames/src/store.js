@@ -11,10 +11,11 @@ export const store = reactive({
   teamOneWordObjects: null,
   teamTwoWordObjects: null,
   bystanderWordObjects: null,
-  computerGuesses: null,
-  computerGuessIndex: null, // computer recieves guesses on load, we get 
   hint:null,
   aiHint:null,
+  previousHumanHints:[],
+  previousAiHints:[],
+  previousAiGuesses:[], // array of Obj
 
 })
 
@@ -28,6 +29,13 @@ function getLengthOfArrays(arr) {
     sum += ar.length;
   })
   return sum;
+}
+
+export function clearData(){
+  store.previousAiGuesses = [];
+  store.previousAiHints = [];
+  store.previousHumanHints = [];
+
 }
 
 /**
