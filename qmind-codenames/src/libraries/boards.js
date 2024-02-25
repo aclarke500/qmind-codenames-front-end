@@ -23,5 +23,13 @@ export const customBoards = [{
   name:'Tech',
   size:4,
 },
+{
+  teamOneWords: ['Link', 'Zelda', 'Epona', 'Triforce', 'Hyrule', 'Fairy', 'Sword', 'Navi', 'Sheik'],
+  teamTwoWords: ['Ganon', 'Dark', 'Majora', 'Skull', 'Shadow', 'Ghirahim', 'Zant', 'Twin', 'Phantom'],
+  bystanderWords: ['Rupee', 'Bomb', 'Hookshot', 'Arrow', 'Deku', 'Heart', 'Potion', 'Map', 'Compass'],
+  assassinWord: 'Malice',
+  name: 'Zelda',
+  size: 5
+}
 
 ]
