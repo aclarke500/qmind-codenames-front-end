@@ -1,7 +1,7 @@
 <template>
   <h1>Worden's Stats</h1>
 
-  <p>Words Found: {{movesLeft()}} / {{totalMoves()}}</p>
+  <p>Words Left: {{movesLeft()}} / {{totalMoves()}}</p>
   <h2>Previous Moves</h2>
   <p v-for="(g) in state.game" key="g" v-if="state.game.length">
     Worden used <div class="hint">{{ g.hint }}</div> and played <div class="moves">{{ g.words.join(", ") }}</div>.
