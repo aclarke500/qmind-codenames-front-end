@@ -104,10 +104,9 @@ export async function computerMove() {
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
   store.previousAiGuesses.push([])
   for (let i = 0; i < compMove.length; i ++){
-    await wait(100)
+    await wait(50)
     compMove[i].clicked() // updates component/Obj
     store.previousAiGuesses[store.previousAiGuesses.length-1].push(compMove[i].word);
-    await wait(250)
   }
 }
 
