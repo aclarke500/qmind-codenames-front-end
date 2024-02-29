@@ -11,7 +11,7 @@ export const customBoards = [{
   teamOneWords:['Ford', 'Tesla', 'Motorcycle'],
   teamTwoWords:['Tree', 'Ocean', 'Fish'],
   bystanderWords:['Society', 'Food'],
-  assassinWord:['Politician'],
+  assassinWord:'Politician',
   name:'Vehicles',
   size: 3,
 },
@@ -30,6 +30,42 @@ export const customBoards = [{
   assassinWord: 'Malice',
   name: 'Zelda',
   size: 5
+},
+{
+  teamOneWords: ['Forest', 'Ocean', 'Mountain', 'River', 'Desert', 'Jungle', 'Volcano', 'Canyon', 'Island'],
+  teamTwoWords: ['Computer', 'Robot', 'Internet', 'Satellite', 'Engine', 'Battery', 'Circuit', 'Drone', 'Software'],
+  bystanderWords: ['City', 'Book', 'Music', 'Art', 'Dance', 'Phone'],
+  assassinWord: 'Virus',
+  name: 'Nature V. Tech',
+  size: 5
+}, 
+{
+  teamOneWords: ['Astronaut', 'Rocket', 'Galaxy', 'Meteor', 'Nebula', 'Saturn', 'Telescope', 'SpaceStation', 'Alien'],
+  teamTwoWords: ['Knight', 'Castle', 'Joust', 'Crown', 'Dragon', 'Tapestry', 'Feast', 'Moat', 'Squire'],
+  bystanderWords: ['Book', 'Map', 'Painting', 'Wheel', 'Garden', 'Market'],
+  assassinWord: 'Plague',
+  name: 'Space V. Medieval',
+  size: 5
+}, 
+{
+  teamOneWords: ['Algorithm', 'Binary', 'Compiler', 'Database', 'Encryption', 'Firewall', 'Git', 'Hardware', 'Syntax'],
+  teamTwoWords: ['Empire', 'Revolution', 'Treaty', 'Dynasty', 'Artifact', 'Colony', 'Feudalism', 'Monarchy', 'Renaissance'],
+  bystanderWords: ['Book', 'School', 'Paper', 'Study', 'World', 'Map'],
+  assassinWord: 'Time',
+  name: 'CSvsHistory',
+  size: 5
+},
+{
+  teamOneWords: ['Pizza', 'Sushi', 'Pasta', 'Burger', 'Salad', 'Steak', 'Taco', 'Curry', 'Cake'],
+  teamTwoWords: ['Atom', 'Gravity', 'Quantum', 'Energy', 'Magnetism', 'Velocity', 'Friction', 'Spectrum', 'Vacuum'],
+  bystanderWords: ['Plate', 'Glass', 'Spoon', 'Book', 'Light', 'Wave'],
+  assassinWord: 'Heat',
+  name: 'FoodVsPhysics',
+  size: 5
 }
+
+
+
+
 
 ]
