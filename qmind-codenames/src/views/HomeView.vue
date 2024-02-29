@@ -103,7 +103,7 @@ async function assignStoreWordsToState() {
 
 
 async function gameOver(message, winner) {
-  await updateScore('AI');
+  await updateScore(winner);
   state.gameOver = true;
   state.message = message;
   state.winner = winner;

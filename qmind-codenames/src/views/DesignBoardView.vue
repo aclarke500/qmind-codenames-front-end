@@ -221,10 +221,13 @@ async function submitWords() {
 
   flex: 1;
   display: flex;
+  
+  flex-direction: column;  
   flex-wrap: wrap;
-  flex-direction: row;  
   justify-content: center;
   align-items: center;
+  height: 200px;
+  margin-bottom: 2rem; 
   /* justify-content: space-around; */
 }
 
