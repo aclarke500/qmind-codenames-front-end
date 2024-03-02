@@ -52,7 +52,7 @@ export const customBoards = [{
   teamTwoWords: ['Empire', 'Revolution', 'Treaty', 'Dynasty', 'Artifact', 'Colony', 'Feudalism', 'Monarchy', 'Renaissance'],
   bystanderWords: ['Book', 'School', 'Paper', 'Study', 'World', 'Map'],
   assassinWord: 'Time',
-  name: 'CSvsHistory',
+  name: 'CS V. History',
   size: 5
 },
 {
@@ -60,7 +60,7 @@ export const customBoards = [{
   teamTwoWords: ['Atom', 'Gravity', 'Quantum', 'Energy', 'Magnetism', 'Velocity', 'Friction', 'Spectrum', 'Vacuum'],
   bystanderWords: ['Plate', 'Glass', 'Spoon', 'Book', 'Light', 'Wave'],
   assassinWord: 'Heat',
-  name: 'FoodVsPhysics',
+  name: 'Food V. Physics',
   size: 5
 }
 
