@@ -8,6 +8,7 @@ import utils.utilities as utils
 import torch
 import torch.nn.functional as F
 import json
+from sentence_transformers import SentenceTransformer
 
 
 VOCAB_PATH = "/home/marcuswrrn/Projects/QMIND/qmind-codenames-front-end/backend/data/words_extended.json"
@@ -31,13 +32,13 @@ vocab_data = VectorSearch(dataset, prune=True)
 
 print(f"Loading Model")
 model = MORSpyMaster(vocab_data, device=device)
+encoder = SentenceTransformer('all-mpnet-base-v2')
 
 pretrained_dict = None 
 if torch.cuda.is_available():
   pretrained_dict = torch.load(MODEL_PATH)   
 else: 
    pretrained_dict = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
-
 model.load_state_dict(pretrained_dict)
 model.to(device)
 model.eval()
@@ -77,7 +78,7 @@ def run_model():
     return jsonify({'hint': f'{guess}', 'targets': pos_sent, 'negative': neg_sent, 'neutral': neut_sent, 'assassin': assas_sent, 'similar_words': sorted_words, 'scores': cos_scores.tolist()})
 
 def encode_words(words: list) -> torch.Tensor:
-    embeddings = model.encoder(words)
+    embeddings = encoder(words)
     return embeddings.to(device)
 
 @app.route('/prompt-model', methods=['POST'])
@@ -86,15 +87,16 @@ def prompt_model():
     # TODO: Check viability of data
     # return 'egg'
 
-    cpu_hint, sorted_words, word_scores = utils.process_prompt_data(data, model)
+    cpu_hint, sorted_words, word_scores = utils.process_prompt_data(data, model, encoder, device)
+    #print(data)
     data_for_human = {
         "target_words": data['negative_words'],
     "negative_words": data['target_words'],
-    "neutral_words": ["rabbit", "dog", "boop"],
-    "assassin_word": "assassin"
+    "neutral_words": data["neutral_words"],
+    "assassin_word": data["assassin_word"]
     }
 
-    human_hint, _, _, = utils.process_prompt_data(data_for_human, model)
+    human_hint, _, _, = utils.process_prompt_data(data_for_human, model, encoder, device)
 
     return jsonify({'cpu_hint': cpu_hint, 'human_hint':human_hint, 'similar_words': sorted_words, 'scores': word_scores})
 

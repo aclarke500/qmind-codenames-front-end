@@ -2,7 +2,8 @@ import torch
 from torch import Tensor
 #import matplotlib.pyplot as plt
 import torch.nn.functional as F
-from model.spymaster import SentenceEncoder, MORSpyMaster
+from model.spymaster import MORSpyMaster
+from sentence_transformers import SentenceTransformer
 
 def get_device(is_cuda: str):
     if (is_cuda.lower() == 'y' and torch.cuda.is_available()):
@@ -91,9 +92,9 @@ def calc_codenames_score(model_out: Tensor, pos_encs: Tensor, neg_encs: Tensor, 
 
     return num_correct.float().mean(), neg_sum, neut_sum, assassin_sum
 
-def encode_words(model: MORSpyMaster, words: list) -> Tensor:
-    embeddings = model.encoder(words)
-    return embeddings.to(model.device)
+def encode_words(encoder: SentenceTransformer, words: list,  device: torch.device) -> torch.Tensor:
+    embeddings = encoder.encode(words, convert_to_tensor=True)
+    return embeddings.to(device)
 
 def score_response(words: list, guess_emb: Tensor, targ_embs: Tensor, neg_embs: Tensor, neut_embs: Tensor, assas_emb: Tensor):
     combined_embeddings = torch.cat((targ_embs, neg_embs, neut_embs, assas_emb), dim=0)
@@ -104,7 +105,8 @@ def score_response(words: list, guess_emb: Tensor, targ_embs: Tensor, neg_embs: 
     return sorted_words, cos_scores
 
 
-def process_prompt_data(data, model: MORSpyMaster):
+
+def process_prompt_data(data, model: MORSpyMaster, encoder: SentenceTransformer, device: torch.device):
     targ_words = data['target_words']
     neg_words = data['negative_words']
     neut_words = data['neutral_words']
@@ -112,11 +114,14 @@ def process_prompt_data(data, model: MORSpyMaster):
     words = targ_words + neg_words + neut_words
     words.append(assas_word)
 
-    targ_embs = encode_words(model, targ_words)
-    neg_embs =  encode_words(model, neg_words)
-    neut_embs = encode_words(model, neut_words)
-    assas_emb = encode_words(model, assas_word)
-
+    targ_embs = encode_words(encoder, targ_words, device)
+    neg_embs =  encode_words(encoder, neg_words, device)
+    neut_embs = encode_words(encoder, neut_words, device)
+    assas_emb = encode_words(encoder, assas_word, device)
+    assas_emb = assas_emb.unsqueeze(0)
+    print(neut_embs.shape)
+    print(assas_emb.shape)
+    
     with torch.no_grad():
         guess, guess_emb = model(targ_embs, neg_embs, neut_embs, assas_emb)
     

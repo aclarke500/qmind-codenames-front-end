@@ -21,29 +21,29 @@ class SentenceEncoder(nn.Module):
             encodings = encodings.unsqueeze(0)
         # out = self.fc(encodings)
         return encodings
-
+    
 class MORSpyMaster(nn.Module):
     """
-    Multi-Objective Retrieval model for codenames with 4 competing objectives
+    Multi-Objective Retrieval model with 4 competing objectives
+
+    Uses default search head configuration
     """
-    def __init__(self, vocab: VectorSearch, device: torch.device, neutral_weight=1.0, negative_weight=0.0, assas_weights=-10.0, backbone='all-mpnet-base-v2', vocab_size=80, search_pruning=False):
+    def __init__(self, vocab: VectorSearch, device: torch.device, neutral_weight=1.0, negative_weight=0.0, assas_weights=-10.0, vocab_size=80, search_pruning=False, bias=True):
         super().__init__()
-        self.encoder = SentenceEncoder(backbone)
         self.vocab_size = vocab_size
 
         self.neut_weight = neutral_weight
         self.neg_weight = negative_weight
-        self.assas_weights = assas_weights
+        self.assas_weight = assas_weights
         
         self.fc = nn.Sequential(
-            nn.Linear(3072, 2304),
+            nn.Linear(3072, 2304, bias=bias),
             nn.Tanh(),
-            nn.Linear(2304, 1700),
+            nn.Linear(2304, 1700, bias=bias),
             nn.Tanh(),
-            nn.Linear(1700, 1000),
-            nn.Tanh(),
-            nn.Linear(1000, 768),
+            nn.Linear(1700, 768, bias=bias),
         )
+
         self.vocab = vocab
         self.device = device
 
@@ -51,7 +51,7 @@ class MORSpyMaster(nn.Module):
 
     def _process_embeddings(self, embs: Tensor):
         """Mean pool and normalize all embeddings"""
-        out = torch.mean(embs, dim=1)
+        out = torch.mean(embs,dim=1)
         out = F.normalize(out, p=2, dim=1)
         return out
     
@@ -96,7 +96,7 @@ class MORSpyMaster(nn.Module):
 
         neg_reward = self._get_reward_tensor(neg_scores.shape[2], self.neg_weight, reverse)
         neut_reward = self._get_reward_tensor(neut_scores.shape[2], self.neut_weight, reverse)
-        assas_reward = self._get_reward_tensor(assas_scores.shape[2], self.assas_weights, reverse)
+        assas_reward = self._get_reward_tensor(assas_scores.shape[2], self.assas_weight, reverse)
 
         combined_rewards = torch.cat((neg_reward, neut_reward, assas_reward))
         combined_rewards = combined_rewards.expand((combined.shape[0], self.vocab_size, combined_rewards.shape[0]))
@@ -181,3 +181,33 @@ class MORSpyMaster(nn.Module):
             return model_out, search_embedding, search_out_max, search_out_min
         
         return search_word, search_embedding
+
+class MORSpyMPNet(MORSpyMaster):
+    def __init__(self, vocab: VectorSearch, device: device, neutral_weight=1, negative_weight=0, assas_weights=-10, vocab_size=80, search_pruning=False, bias=True):
+        """Uses 768 dimensional embeddings with a larger search head, to be used with mpnet"""
+        super().__init__(vocab, device, neutral_weight, negative_weight, assas_weights, vocab_size, search_pruning, bias)
+
+        self.fc = nn.Sequential(
+            nn.Linear(3072, 5000, bias=bias),
+            nn.Tanh(),
+            nn.Linear(5000, 2500, bias=bias),
+            nn.Tanh(),
+            nn.Linear(2500, 1500, bias=bias),
+            nn.Tanh(),
+            nn.Linear(1500, 768, bias=bias)
+        )
+
+class MORSpyMiniLM(MORSpyMaster):
+    def __init__(self, vocab: VectorSearch, device: device, neutral_weight=1, negative_weight=0, assas_weights=-10, vocab_size=80, search_pruning=False, bias=True):
+        """Uses 384 dimensional embeddings for use with mini-lm model"""
+        super().__init__(vocab, device, neutral_weight, negative_weight, assas_weights, vocab_size, search_pruning, bias)
+
+        self.fc = nn.Sequential(
+            nn.Linear(1536, 2000, bias=bias),
+            nn.Tanh(),
+            nn.Linear(2000, 1500, bias=bias),
+            nn.Tanh(),
+            nn.Linear(1500, 750, bias=bias),
+            nn.Tanh(),
+            nn.Linear(750, 384, bias=bias)
+        )
