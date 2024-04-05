@@ -16,6 +16,12 @@ class VectorSearch():
     
     def __len__(self):
         return len(self.vocab_words)
+
+    def append_vocab(self, text: str, emb: torch.Tensor):
+        emb.detach().cpu().numpy()
+        self.index.add(emb)
+        self.vocab_embeddings.append(emb)
+        self.vocab_words(text)
     
     def search(self, logits: torch.Tensor, num_results=20):
         # detach tensor from device and convert it to numpy for faiss compatibility
