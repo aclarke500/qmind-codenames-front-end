@@ -1,5 +1,7 @@
 <h2>Front End for QMIND's Bias Modelling Project featuring codenames</h2>
 
+<h3>Demo:</h3>
+<a href="https://www.youtube.com/watch?v=7ilDbUuFnBc">Click here</a>
 You will need vue and flask installed, which you can install by running:<br>
 <strong>Vue:</strong>
 ```
